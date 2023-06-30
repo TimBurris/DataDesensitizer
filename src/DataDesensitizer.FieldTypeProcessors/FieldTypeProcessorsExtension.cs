@@ -27,6 +27,7 @@ public static partial class FieldTypeProcessorsExtension
         //   if the process needs to enforce uniqueness, it must use static variables or whatever it needs to ensure uniqueness
         services.AddTransient<PhoneNumberFieldTypeProcessor>();
         services.AddTransient<SalaryFieldTypeProcessor>();
+        services.AddTransient<SocialSecurityNumberFieldTypeProcessor>();
 
         //for not these are singleton until we figure how we want to handle knowing when to dispose/close the base file
         services.AddSingleton<CompanyNameFieldTypeProcessor>();
