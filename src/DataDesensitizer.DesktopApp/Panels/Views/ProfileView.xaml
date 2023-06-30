@@ -30,6 +30,12 @@
                 <Setter Property="mah:ItemHelper.HoverSelectedForegroundBrush" Value="{DynamicResource MahApps.Brushes.AccentBase}" />
                 <Setter Property="mah:ItemHelper.SelectedBackgroundBrush" Value="Transparent" />
                 <Setter Property="mah:ItemHelper.SelectedForegroundBrush" Value="{DynamicResource MahApps.Brushes.AccentBase}" />
+                <Setter Property="Opacity" Value="0.5" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasConfig}" Value="True">
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
 
             <Style
@@ -42,11 +48,55 @@
                 <Setter Property="PaneForeground" Value="{DynamicResource MahApps.Brushes.Text}" />
                 <Setter Property="ShowSelectionIndicator" Value="True" />
             </Style>
+            <Style
+                x:Key="FieldTypeSelectorButton"
+                BasedOn="{StaticResource MahApps.Styles.Button}"
+                TargetType="Button">
+                <Setter Property="Opacity" Value="0.5" />
+                <Setter Property="Margin" Value="2" />
+                <Setter Property="MinWidth" Value="120" />
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource MahApps.Brushes.Accent}" />
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+                Grid.Column="0"
+                mah:TextBoxHelper.UseFloatingWatermark="True"
+                mah:TextBoxHelper.Watermark="Connection String"
+                IsEnabled="False"
+                Text="{Binding ConnectionString, Mode=TwoWay}" />
+            <Button Grid.Column="1" Command="{Binding ChangeDatabaseConnectionCommand}">
+                <iconPacks:PackIconMaterial
+                    Grid.Column="0"
+                    Width="40"
+                    Height="30"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Kind="Cog" />
+            </Button>
+        </Grid>
+
         <Border
-            Grid.Column="0"
+            Grid.Row="1"
             BorderBrush="{DynamicResource MahApps.Brushes.Gray7}"
             BorderThickness="1">
 
@@ -62,7 +112,7 @@
                 ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
                 ItemsSource="{Binding MenuLineItems}"
                 MaximumOpenPaneLength="800"
-                OpenPaneLength="300"
+                OpenPaneLength="400"
                 Style="{StaticResource MyMenu}"
                 VerticalScrollBarOnLeftSide="True">
                 <mah:HamburgerMenu.ItemTemplate>
@@ -88,7 +138,7 @@
                     </DataTemplate>
                 </mah:HamburgerMenu.ItemTemplate>
                 <!--  Options  -->
-                <mah:HamburgerMenu.OptionsItemsSource>
+                <!--<mah:HamburgerMenu.OptionsItemsSource>
                     <mah:HamburgerMenuItemCollection>
                         <mah:HamburgerMenuItem Label="Add Table" />
                     </mah:HamburgerMenuItemCollection>
@@ -111,7 +161,7 @@
                             </StackPanel>
                         </Button>
                     </DataTemplate>
-                </mah:HamburgerMenu.OptionsItemTemplate>
+                </mah:HamburgerMenu.OptionsItemTemplate>-->
                 <!--  Content  -->
                 <mah:HamburgerMenu.ContentTemplate>
                     <DataTemplate>
@@ -131,14 +181,13 @@
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto" />
                                                             <RowDefinition Height="*" />
-                                                            <RowDefinition Height="Auto" />
                                                         </Grid.RowDefinitions>
                                                         <Border
                                                             Grid.Row="0"
                                                             Padding="10"
                                                             Background="{StaticResource MahApps.Brushes.Gray8}">
 
-                                                            <Label Content="{Binding Name}" />
+                                                            <Label Content="{Binding DisplayName}" />
                                                         </Border>
 
                                                         <!--  Columns List  -->
@@ -160,52 +209,47 @@
                                                                         </Border.Style>
                                                                         <Grid>
                                                                             <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="Auto" />
                                                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ColNameGroup" />
                                                                                 <ColumnDefinition />
                                                                             </Grid.ColumnDefinitions>
-                                                                            <Button
-                                                                                Width="30"
-                                                                                Height="30"
-                                                                                HorizontalAlignment="Center"
-                                                                                VerticalAlignment="Center"
-                                                                                Style="{StaticResource MahApps.Styles.Button.Circle}">
-                                                                                <iconPacks:PackIconMaterial
-                                                                                    Width="15"
-                                                                                    Height="15"
-                                                                                    Kind="Pencil" />
-                                                                            </Button>
+
                                                                             <Label
-                                                                                Grid.Column="1"
+                                                                                Grid.Column="0"
                                                                                 HorizontalAlignment="Stretch"
-                                                                                Content="{Binding Name}" />
-                                                                            <Label
-                                                                                Grid.Column="2"
-                                                                                Content="{Binding FieldType}"
-                                                                                Foreground="{StaticResource MahApps.Brushes.Accent}"
-                                                                                Visibility="{Binding HasFieldType, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                                                VerticalAlignment="Center"
+                                                                                Content="{Binding Name}">
+                                                                                <Label.Style>
+                                                                                    <Style TargetType="Label">
+                                                                                        <Setter Property="Opacity" Value="0.5" />
+                                                                                        <Style.Triggers>
+                                                                                            <DataTrigger Binding="{Binding HasSelectedFieldType}" Value="True">
+                                                                                                <Setter Property="Opacity" Value="1" />
+                                                                                            </DataTrigger>
+                                                                                        </Style.Triggers>
+                                                                                    </Style>
+                                                                                </Label.Style>
+                                                                            </Label>
+                                                                            <ItemsControl Grid.Column="1" ItemsSource="{Binding FieldTypes}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <WrapPanel Orientation="Horizontal" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate>
+                                                                                        <Button
+                                                                                            Command="{Binding DataContext.SelectFieldTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                                            CommandParameter="{Binding}"
+                                                                                            Content="{Binding Name}"
+                                                                                            Style="{StaticResource FieldTypeSelectorButton}" />
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
                                                                         </Grid>
                                                                     </Border>
                                                                 </DataTemplate>
                                                             </ItemsControl.ItemTemplate>
                                                         </ItemsControl>
-
-                                                        <Button
-                                                            Grid.Row="2"
-                                                            HorizontalAlignment="Left"
-                                                            Command="{Binding DataContext.AddColumnCommand, RelativeSource={RelativeSource AncestorType=local:ProfileView}}"
-                                                            CommandParameter="{Binding}"
-                                                            Style="{StaticResource AccentButton}">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <iconPacks:PackIconMaterial
-                                                                    Width="18"
-                                                                    Height="18"
-                                                                    HorizontalAlignment="Center"
-                                                                    VerticalAlignment="Center"
-                                                                    Kind="Plus" />
-                                                                <Label>Add Column</Label>
-                                                            </StackPanel>
-                                                        </Button>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -220,5 +264,13 @@
             </mah:HamburgerMenu>
 
         </Border>
+
+        <Button
+            Grid.Row="2"
+            Width="100"
+            HorizontalAlignment="Right"
+            BorderBrush="{StaticResource MahApps.Brushes.Control.Validation}"
+            Command="{Binding ConfirmRunCommand}"
+            Content="Run" />
     </Grid>
 </UserControl>

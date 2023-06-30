@@ -88,7 +88,7 @@ public partial class App : Application
 
         //flyouts
         manager.RegisterDataTemplate<Flyouts.ViewModels.BuyMeACoffeeFlyoutViewModel, Flyouts.Views.BuyMeACoffeeFlyoutView>();
-        manager.RegisterDataTemplate<Flyouts.ViewModels.AddProfileTableFlyoutViewModel, Flyouts.Views.AddProfileTableFlyoutView>();
+        manager.RegisterDataTemplate<Flyouts.ViewModels.SelectDatabaseConnectionFlyoutViewModel, Flyouts.Views.SelectDatabaseConnectionFlyoutView>();
 
         //panels
         manager.RegisterDataTemplate<Panels.ViewModels.ProfileViewModel, Panels.Views.ProfileView>();

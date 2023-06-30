@@ -3,4 +3,5 @@
 public interface INavigator
 {
     void ShowFlyout(Flyouts.ViewModels.IFlyoutViewModel viewModel);
+    Task ShowConfirmationDialogAsync(ConfirmationDialogModel item);
 }

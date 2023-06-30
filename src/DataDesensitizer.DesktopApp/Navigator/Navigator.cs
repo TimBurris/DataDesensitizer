@@ -16,4 +16,9 @@ public class Navigator : Abstractions.INavigator
         var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
         mainViewModel.ShowFlyout(viewModel);
     }
+    public Task ShowConfirmationDialogAsync(ConfirmationDialogModel item)
+    {
+        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+        return mainViewModel.ShowConfirmationDialogAsync(item);
+    }
 }

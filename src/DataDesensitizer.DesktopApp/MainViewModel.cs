@@ -1,5 +1,4 @@
-﻿using DataDesensitizer.Abstractions;
-using DataDesensitizer.DesktopApp.Flyouts.ViewModels;
+﻿using DataDesensitizer.DesktopApp.Flyouts.ViewModels;
 using DataDesensitizer.DesktopApp.Panels.ViewModels;
 using DataDesensitizer.DesktopApp.ToastNotification.Abstractions;
 using System.Threading;
@@ -9,46 +8,42 @@ public class MainViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 {
     private readonly BuyMeACoffeeFlyoutViewModel _buyMeACoffeeFlyoutViewModel;
     private readonly IToastFaultlessExecutionService _toastFaultlessExecutionService;
-    private readonly IToastNotificationService _toastNotificationService;
-    private readonly IProfileProcessor _profileProcessor;
+    private readonly SelectDatabaseConnectionFlyoutViewModel _selectDatabaseConnectionFlyoutViewModel;
     private readonly ProfileViewModel _profileViewModel;
 
     public MainViewModel(
         Flyouts.ViewModels.BuyMeACoffeeFlyoutViewModel buyMeACoffeeFlyoutViewModel,
         ToastNotification.Abstractions.IToastFaultlessExecutionService toastFaultlessExecutionService,
-        ToastNotification.Abstractions.IToastNotificationService toastNotificationService,
-        Abstractions.IProfileProcessor profileProcessor,
+        SelectDatabaseConnectionFlyoutViewModel selectDatabaseConnectionFlyoutViewModel,
         Panels.ViewModels.ProfileViewModel profileViewModel)
     {
         _buyMeACoffeeFlyoutViewModel = buyMeACoffeeFlyoutViewModel;
         _toastFaultlessExecutionService = toastFaultlessExecutionService;
-        _toastNotificationService = toastNotificationService;
-        _profileProcessor = profileProcessor;
+        _selectDatabaseConnectionFlyoutViewModel = selectDatabaseConnectionFlyoutViewModel;
         _profileViewModel = profileViewModel;
     }
 
     protected override Task<bool> OnReloadDataAsync(CancellationToken cancellationToken)
     {
-        this.ConnectionString = "Data Source=(local);Initial Catalog=SeminarEdge;Trusted_Connection=true;MultipleActiveResultSets=true;encrypt=false;";
-
-        var content = System.IO.File.ReadAllText(@"E:\Temp\DataDesensitizer\SeminarEdgeProfile.json");
-
-        var profile = System.Text.Json.JsonSerializer.Deserialize<Models.ProfileModel>(content);
-        _profileViewModel.AssignProfile(profile);
-
-        this.CurrentPanel = _profileViewModel;
-
+        if (!this.HasEverBeenLoaded)
+        {
+            _selectDatabaseConnectionFlyoutViewModel.FlyoutConfirmed += this._selectDatabaseConnectionFlyoutViewModel_FlyoutConfirmed;
+            this.ShowFlyoutCommand.Execute(_selectDatabaseConnectionFlyoutViewModel);
+        }
 
         return base.OnReloadDataAsync(cancellationToken);
     }
 
-    #region Binding Props
-
-    public string ConnectionString
+    private void _selectDatabaseConnectionFlyoutViewModel_FlyoutConfirmed(object? sender, EventArgs e)
     {
-        get { return GetField<string>(); }
-        set { SetField(value); }
+        if (!string.IsNullOrEmpty(_selectDatabaseConnectionFlyoutViewModel.ConnectionString))
+        {
+            _profileViewModel.ConnectionString = _selectDatabaseConnectionFlyoutViewModel.ConnectionString;
+            this.CurrentPanel = _profileViewModel;
+        }
     }
+
+    #region Binding Props
 
     public Flyouts.ViewModels.IFlyoutViewModel CurrentFlyout
     {
@@ -82,66 +77,6 @@ public class MainViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 
     #endregion
 
-    #region RunProcessor Command
-
-    public NinjaMvvm.Wpf.RelayCommand RunProcessorCommand => new NinjaMvvm.Wpf.RelayCommand((param) => _toastFaultlessExecutionService.TryExecuteAsync(() => this.RunProcessorAsync()));
-
-    public async Task RunProcessorAsync()
-    {
-        this.IsBusy = true;
-
-        try
-        {
-            var content = System.IO.File.ReadAllText(@"E:\Temp\DataDesensitizer\SeminarEdgeProfile.json");
-
-            var profile = System.Text.Json.JsonSerializer.Deserialize<Models.ProfileModel>(content);
-            if (profile == null)
-            {
-                _toastNotificationService.ShowToast(ToastNotification.ToastType.Warning, "Profile empty");
-                return;
-            }
-            //var profile = new ProfileModel(profileName: "")
-            //{
-            //    TableSettings = new List<TableSettingModel>()
-            //    {
-            //        new TableSettingModel(schemaName:"dbo", tableName:"AgentContact")
-            //        {
-            //            Randomize = true,
-            //            ColumnSettings=new List<ColumnSettingModel>()
-            //            {
-            //                new ColumnSettingModel(columnName:"Name",typeof(FullNameFieldTypeProcessor).AssemblyQualifiedName),
-            //                new ColumnSettingModel(columnName:"WorkPhoneNumber",typeof(PhoneNumberFieldTypeProcessor).AssemblyQualifiedName),
-            //            }
-            //        },
-
-            //         new TableSettingModel(schemaName:"dbo", tableName:"Agent")
-            //        {
-            //            Randomize = true,
-            //            ColumnSettings=new List<ColumnSettingModel>()
-            //            {
-            //                new ColumnSettingModel(columnName:"CompanyName",typeof(CompanyNameFieldTypeProcessor).AssemblyQualifiedName),
-            //                new ColumnSettingModel(columnName:"AddressLine1",typeof(StreetAddressLineFieldTypeProcessor).AssemblyQualifiedName),
-            //                new ColumnSettingModel(columnName:"City",typeof(CityNameFieldTypeProcessor).AssemblyQualifiedName),
-            //                new ColumnSettingModel(columnName:"StateOrProvince",typeof(StateAbbreviationFieldTypeProcessor).AssemblyQualifiedName),
-            //                new ColumnSettingModel(columnName:"ZipCode",typeof(ZipCodeFieldTypeProcessor).AssemblyQualifiedName),
-            //            }
-            //        }
-            //    }
-            //};
-
-
-            _toastNotificationService.ShowToast(ToastNotification.ToastType.Info, "starting....");
-            await Task.Run(() => _profileProcessor.RunProfile(profile, this.ConnectionString));
-            _toastNotificationService.ShowToast(ToastNotification.ToastType.Success, "Completed Successfully!");
-        }
-        finally
-        {
-            this.IsBusy = false;
-        }
-    }
-
-    #endregion
-
     #region ShowFlyout Command
 
     public NinjaMvvm.Wpf.RelayCommand<Flyouts.ViewModels.IFlyoutViewModel> ShowFlyoutCommand => new NinjaMvvm.Wpf.RelayCommand<Flyouts.ViewModels.IFlyoutViewModel>((param) => _toastFaultlessExecutionService.TryExecute(() => this.ShowFlyout(param)));
@@ -163,6 +98,35 @@ public class MainViewModel : NinjaMvvm.Wpf.WpfViewModelBase
     public void HideFlyout()
     {
         this.IsFlyoutOpen = false;
+    }
+
+    #endregion
+
+    #region ShowConfirmationDialog Command
+
+    public NinjaMvvm.Wpf.RelayCommand<ConfirmationDialogModel> ShowConfirmationDialogCommand => new NinjaMvvm.Wpf.RelayCommand<ConfirmationDialogModel>((param) => _toastFaultlessExecutionService.TryExecuteAsync(() => this.ShowConfirmationDialogAsync(param)));
+
+    public async Task ShowConfirmationDialogAsync(ConfirmationDialogModel item)
+    {
+
+        var mySettings = new MahApps.Metro.Controls.Dialogs.MetroDialogSettings
+        {
+            AffirmativeButtonText = item.AffirmativeButtonText ?? "Yes",
+            NegativeButtonText = item.NegativeButtonText ?? "Cancel",
+            AnimateShow = true,
+            AnimateHide = false,
+
+        };
+
+        var d = MahApps.Metro.Controls.Dialogs.DialogCoordinator.Instance;
+        var result = await d.ShowMessageAsync(context: this,
+             title: item.Title,
+             message: item.Message,
+             MahApps.Metro.Controls.Dialogs.MessageDialogStyle.AffirmativeAndNegative,
+             mySettings
+            );
+
+        item.OnComplete?.Invoke((result == MahApps.Metro.Controls.Dialogs.MessageDialogResult.Affirmative));
     }
 
     #endregion

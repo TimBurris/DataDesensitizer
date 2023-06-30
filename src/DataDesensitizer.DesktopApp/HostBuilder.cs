@@ -70,12 +70,14 @@ public class HostBuilder
 
         //register flyouts
         services.AddTransient<Flyouts.ViewModels.BuyMeACoffeeFlyoutViewModel>();
-        services.AddTransient<Flyouts.ViewModels.AddProfileTableFlyoutViewModel>();
+        services.AddTransient<Flyouts.ViewModels.SelectDatabaseConnectionFlyoutViewModel>();
 
         //not a fan of singletons, but these really need to be singleton
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();
 
+        //register our DatabaseInspector
+        services.AddDataDesensitizerDatabaseInspector();
 
         //register our engine
         services.AddDataDesensitizerEngine();

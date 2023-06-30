@@ -1,0 +1,62 @@
+﻿<UserControl
+    x:Class="DataDesensitizer.DesktopApp.Flyouts.Views.SelectDatabaseConnectionFlyoutView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DataDesensitizer.DesktopApp.Flyouts.Views"
+    xmlns:localvm="clr-namespace:DataDesensitizer.DesktopApp.Flyouts.ViewModels"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="400"
+    d:DataContext="{d:DesignInstance Type=localvm:SelectDatabaseConnectionFlyoutViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <StackPanel Margin="15">
+        <StackPanel.Resources>
+            <Style BasedOn="{StaticResource MahApps.Styles.TextBox}" TargetType="{x:Type TextBox}">
+                <Setter Property="Margin" Value="0,10,0,0" />
+            </Style>
+            <Style BasedOn="{StaticResource MahApps.Styles.PasswordBox}" TargetType="{x:Type PasswordBox}">
+                <Setter Property="Margin" Value="0,10,0,0" />
+            </Style>
+            <Style BasedOn="{StaticResource MahApps.Styles.ToggleSwitch}" TargetType="{x:Type mah:ToggleSwitch}">
+                <Setter Property="Margin" Value="0,10,0,0" />
+            </Style>
+        </StackPanel.Resources>
+
+        <TextBox
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Server Name (with optional Instance Name)"
+            Text="{Binding ServerName, NotifyOnValidationError=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
+        <TextBox
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Database Name"
+            Text="{Binding DatabaseName, NotifyOnValidationError=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
+        <mah:ToggleSwitch Content="Integrated Security (aka Windows Authentication)" IsOn="{Binding UseTrustedConnection}" />
+
+        <TextBox
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Username"
+            IsEnabled="{Binding UseTrustedConnection, Converter={StaticResource NegativeBool}}"
+            Text="{Binding Username, NotifyOnValidationError=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+
+        <PasswordBox
+            mah:PasswordBoxBindingBehavior.Password="{Binding Password, NotifyOnValidationError=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Password"
+            IsEnabled="{Binding UseTrustedConnection, Converter={StaticResource NegativeBool}}" />
+
+        <mah:ToggleSwitch Content="Encrypt" IsOn="{Binding EncryptConnection}" />
+        <mah:ToggleSwitch Content="Multiple Active Results" IsOn="{Binding MultipleActiveResultSets}" />
+
+        <Button
+            Margin="0,30,0,0"
+            Command="{Binding ConnectCommand}"
+            Content="Connect"
+            Style="{StaticResource AccentButton}" />
+    </StackPanel>
+</UserControl>
