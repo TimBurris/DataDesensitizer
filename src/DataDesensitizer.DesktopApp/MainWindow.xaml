@@ -1,0 +1,92 @@
+﻿<mah:MetroWindow
+    x:Class="DataDesensitizer.DesktopApp.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:local="clr-namespace:DataDesensitizer.DesktopApp"
+    xmlns:localvm="clr-namespace:DataDesensitizer.DesktopApp"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ninjawpf="clr-namespace:NinjaMvvm.Wpf.Controls;assembly=NinjaMvvm.Wpf"
+    xmlns:notifications="clr-namespace:Notifications.Wpf.Core.Controls;assembly=Notifications.Wpf.Core"
+    Title="Data Desensitizer By Chalk Logic"
+    Width="1600"
+    Height="900"
+    d:DataContext="{d:DesignInstance Type=localvm:MainViewModel,
+                                     IsDesignTimeCreatable=False}"
+    GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
+    ShowIconOnTitleBar="True"
+    TitleBarHeight="50"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <mah:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <iconPacks:PackIconFontAwesome
+                Width="30"
+                Height="30"
+                Margin="4"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource MahApps.Brushes.IdealForeground}"
+                Kind="MaskSolid" />
+        </DataTemplate>
+    </mah:MetroWindow.IconTemplate>
+
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Button Command="{Binding BuyMeACoffeeCommand}">
+                <iconPacks:PackIconSimpleIcons
+                    Width="22"
+                    Height="22"
+                    VerticalAlignment="Center"
+                    Kind="BuyMeACoffee" />
+            </Button>
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+
+            <mah:Flyout
+                Header="{Binding CurrentFlyout.ViewTitle}"
+                IsModal="True"
+                IsOpen="{Binding IsFlyoutOpen}"
+                Position="Right">
+                <ninjawpf:BindableContentPresenter Content="{Binding CurrentFlyout}" />
+            </mah:Flyout>
+
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
+
+    <Grid>
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBox
+                Grid.Row="0"
+                mah:TextBoxHelper.UseFloatingWatermark="True"
+                mah:TextBoxHelper.Watermark="Connection String"
+                Text="{Binding ConnectionString, Mode=TwoWay}" />
+            <Button
+                Grid.Row="1"
+                Width="100"
+                Command="{Binding RunProcessorCommand}"
+                Content="Run"
+                Style="{DynamicResource AccentButton}" />
+            <ninjawpf:BindableContentPresenter Grid.Row="2" Content="{Binding CurrentPanel}" />
+        </Grid>
+
+        <Border Background="#7F000000" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <mah:ProgressRing />
+        </Border>
+
+        <!--  using bottom left because our flyouts are on the right and they cover toast :(  -->
+        <notifications:NotificationArea
+            x:Name="WindowArea"
+            MaxItems="3"
+            Position="BottomLeft" />
+    </Grid>
+</mah:MetroWindow>

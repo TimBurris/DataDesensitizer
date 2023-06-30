@@ -1,0 +1,40 @@
+﻿<Application
+    x:Class="DataDesensitizer.DesktopApp.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:DataDesensitizer.DesktopApp"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:ninjawpf="clr-namespace:NinjaMvvm.Wpf.Converters;assembly=NinjaMvvm.Wpf"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Purple.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ninjawpf:NegativeBooleanToVisibilityConverter x:Key="NegativeBoolToVis" />
+
+            <Style BasedOn="{StaticResource MahApps.Styles.Button.Square}" TargetType="Button">
+                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
+            </Style>
+
+            <Style
+                x:Key="AccentButton"
+                BasedOn="{StaticResource MahApps.Styles.Button.Square.Accent}"
+                TargetType="Button">
+                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
+                <Setter Property="Padding" Value="10,5" />
+
+            </Style>
+
+            <sys:Double x:Key="MahApps.Font.Size.FloatingWatermark">15</sys:Double>
+            <sys:Double x:Key="MahApps.Font.Size.Default">22</sys:Double>
+            <sys:Double x:Key="MahApps.Font.Size.Content">18</sys:Double>
+
+            <!--  If you are looking for View to ViewModel DataTemplates, you will find them registerd dynamically in the codebehind of this file  -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
