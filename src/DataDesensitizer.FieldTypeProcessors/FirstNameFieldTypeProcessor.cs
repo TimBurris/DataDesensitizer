@@ -13,4 +13,10 @@ public class FirstNameFieldTypeProcessor : SourceFileFieldTypeProcessorBase, Abs
 
     public string Name => "First Name";
     protected override string Filename => "FirstNames.txt";
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("FirstName", StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -13,4 +13,9 @@ public class LastNameFieldTypeProcessor : SourceFileFieldTypeProcessorBase, Abst
 
     public string Name => "Last Name";
     protected override string Filename => "LastNames.txt";
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("LastName", StringComparison.OrdinalIgnoreCase);
+    }
 }

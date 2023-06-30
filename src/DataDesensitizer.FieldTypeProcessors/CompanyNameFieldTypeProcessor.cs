@@ -14,4 +14,11 @@ public class CompanyNameFieldTypeProcessor : SourceFileFieldTypeProcessorBase, A
     public string Name => "Company";
 
     protected override string Filename => "CompanyNames.txt";
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("CompanyName", StringComparison.OrdinalIgnoreCase)
+            || columnName.Equals("Company", StringComparison.OrdinalIgnoreCase);//i don't want Contains("Company") because that'll hit things like CompanyEmailAddress
+    }
 }

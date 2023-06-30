@@ -24,6 +24,13 @@ public class StreetAddressLineFieldTypeProcessor : SourceFileFieldTypeProcessorB
         return streetNumber + " " + streetName;
     }
 
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("Street", StringComparison.OrdinalIgnoreCase)
+            || columnName.Contains("AddressLine1", StringComparison.OrdinalIgnoreCase);
+    }
+
     private string GenerateRandomNumber()
     {
         var rnd = SeedRandom();

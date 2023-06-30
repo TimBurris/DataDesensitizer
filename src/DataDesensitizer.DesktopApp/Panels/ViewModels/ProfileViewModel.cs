@@ -60,7 +60,8 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 
         foreach (var p in _fieldTypeProcessorProvider.GetAll().OrderBy(x => x.Name))
         {
-            _fieldTypeLineItems.Add(new FieldTypeLineItem(p.Name, p.GetType().AssemblyQualifiedName ?? "-unknown-"));
+            _fieldTypeLineItems.Add(new FieldTypeLineItem(p.Name, p.GetType().AssemblyQualifiedName ?? "-unknown-",
+                recommendedAction: columnName => p.IsRecommendedForColumnName(columnName)));
         }
     }
 
@@ -263,7 +264,6 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
     }
 
     #endregion
-
 
     #region ChangeDatabaseConnection Command
 
@@ -469,7 +469,9 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
             var items = fieldTypes.Select(x => new SelectableFieldTypeLineItem(x)
             {
                 IsSelected = string.Equals(selectedFieldType, x.Name, StringComparison.OrdinalIgnoreCase),
+                IsRecommended = x.RecommendedAction?.Invoke(this.Name) ?? false,
             }).ToList();
+
 
             return new NinjaMvvm.NotificationObservableCollection<SelectableFieldTypeLineItem>(items);
         }
@@ -523,6 +525,12 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
                 set { SetField(value); }
             }
 
+            public bool IsRecommended
+            {
+                get { return GetField<bool>(); }
+                set { SetField(value); }
+            }
+
             public string Name { get; }
             public string FieldTypeProcessorTypeName { get; }
         }
@@ -530,12 +538,15 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 
     public class FieldTypeLineItem
     {
-        public FieldTypeLineItem(string name, string fieldTypeProcessorTypeName)
+        public FieldTypeLineItem(string name, string fieldTypeProcessorTypeName, Func<string, bool>? recommendedAction)
         {
             this.Name = name;
             this.FieldTypeProcessorTypeName = fieldTypeProcessorTypeName;
+            this.RecommendedAction = recommendedAction;
         }
+
         public string Name { get; }
         public string FieldTypeProcessorTypeName { get; }
+        public Func<string, bool>? RecommendedAction { get; }
     }
 }

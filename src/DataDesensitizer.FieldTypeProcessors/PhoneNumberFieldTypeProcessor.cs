@@ -26,6 +26,16 @@ public class PhoneNumberFieldTypeProcessor : Abstractions.IFieldTypeProcessor
         return this.GenerateRandomPhoneNumber();
     }
 
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("PhoneNumber", StringComparison.OrdinalIgnoreCase)
+            || columnName.Contains("HomeNumber", StringComparison.OrdinalIgnoreCase)
+            || columnName.Contains("MobileNumber", StringComparison.OrdinalIgnoreCase)
+            || columnName.Contains("WorkNumber", StringComparison.OrdinalIgnoreCase)
+            || columnName.EndsWith("Phone", StringComparison.OrdinalIgnoreCase);
+    }
+
     private string GenerateRandomPhoneNumber()
     {
         int length = this.Use555 ? 7 : 10;

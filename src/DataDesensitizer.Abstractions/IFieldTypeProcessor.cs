@@ -10,4 +10,5 @@ public interface IFieldTypeProcessor
     object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader);
 
 
+    bool IsRecommendedForColumnName(string columnName);
 }

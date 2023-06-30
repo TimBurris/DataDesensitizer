@@ -56,11 +56,16 @@
                 <Setter Property="Margin" Value="2" />
                 <Setter Property="MinWidth" Value="120" />
                 <Setter Property="Width" Value="Auto" />
-                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontSize" Value="11" />
                 <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Normal" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
                         <Setter Property="Background" Value="{StaticResource MahApps.Brushes.Accent}" />
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsRecommended}" Value="True">
+                        <Setter Property="BorderBrush" Value="#FFFFF000" />
+                        <Setter Property="BorderThickness" Value="1" />
                         <Setter Property="Opacity" Value="1" />
                     </DataTrigger>
                 </Style.Triggers>

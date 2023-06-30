@@ -14,4 +14,10 @@ public class FullNameFieldTypeProcessor : SourceFileFieldTypeProcessorBase, Abst
     public string Name => "Full Name";
 
     protected override string Filename => "FullNames.txt";
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("FullName", StringComparison.OrdinalIgnoreCase);
+    }
 }

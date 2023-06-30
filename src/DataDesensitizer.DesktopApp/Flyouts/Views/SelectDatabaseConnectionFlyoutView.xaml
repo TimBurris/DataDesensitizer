@@ -7,7 +7,7 @@
     xmlns:localvm="clr-namespace:DataDesensitizer.DesktopApp.Flyouts.ViewModels"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="400"
+    Width="600"
     d:DataContext="{d:DesignInstance Type=localvm:SelectDatabaseConnectionFlyoutViewModel,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
@@ -57,6 +57,7 @@
             Margin="0,30,0,0"
             Command="{Binding ConnectCommand}"
             Content="Connect"
+            IsDefault="True"
             Style="{StaticResource AccentButton}" />
     </StackPanel>
 </UserControl>

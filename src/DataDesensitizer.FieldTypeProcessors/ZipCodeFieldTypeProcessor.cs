@@ -20,6 +20,15 @@ public class ZipCodeFieldTypeProcessor : Abstractions.IFieldTypeProcessor
         return this.GenerateRandomNumber(length: 5);
     }
 
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("ZipCode", StringComparison.OrdinalIgnoreCase)
+            || columnName.Contains("PostalCode", StringComparison.OrdinalIgnoreCase)
+            || columnName.Equals("Zip", StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// Create a random number as a string with a maximum length.
     /// </summary>

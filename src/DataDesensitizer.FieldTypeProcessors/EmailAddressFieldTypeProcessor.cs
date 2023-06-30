@@ -16,4 +16,12 @@ public class EmailAddressFieldTypeProcessor : SourceFileFieldTypeProcessorBase, 
 
     //alternatively we could just have a list of domains and generate randoms
     protected override string Filename => "EmailAddresses.txt";
+
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("EmailAddress", StringComparison.OrdinalIgnoreCase)
+            || columnName.EndsWith("Email", StringComparison.OrdinalIgnoreCase);
+    }
 }

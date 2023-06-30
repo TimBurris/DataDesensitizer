@@ -13,4 +13,10 @@ public class CityNameFieldTypeProcessor : SourceFileFieldTypeProcessorBase, Abst
 
     public string Name => "City";
     protected override string Filename => "CityNames.txt";
+
+    public bool IsRecommendedForColumnName(string columnName)
+    {
+        columnName = columnName.StripNonAlphaNumericChars();
+        return columnName.Contains("city", StringComparison.OrdinalIgnoreCase);
+    }
 }
