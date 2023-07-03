@@ -95,7 +95,7 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 
     private async Task LoadMenuItemsAsync()
     {
-        this.MenuLineItems.Clear();
+        this.TableLineItems.Clear();
 
         //for now i'm not allowing this, it seems kinda useless
         //this.MenuLineItems.Add(new MenuLineItem()
@@ -109,12 +109,12 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
         {
             foreach (var t in _profileModel.TableSettings)
             {
-                var menuItem = new MenuLineItem(new TableLineItem(t, _fieldTypeLineItems));
-                this.MenuLineItems.Add(menuItem);
+                var lineItem = new TableLineItem(t, _fieldTypeLineItems);
+                this.TableLineItems.Add(lineItem);
 
-                if (!existingTables.Contains(menuItem.Name))
+                if (!existingTables.Contains(lineItem.DisplayName))
                 {
-                    existingTables.Add(menuItem.Name);
+                    existingTables.Add(lineItem.DisplayName);
                 }
             }
         }
@@ -126,12 +126,12 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
         var allTables = tableResult.ReturnValue;
         foreach (var table in allTables.OrderBy(x => x.SchemaName).ThenBy(x => x.TableName))
         {
-            var x = new Models.TableSettingModel(table.SchemaName, table.TableName);
-            var menuItem = new MenuLineItem(new TableLineItem(x, _fieldTypeLineItems));
+            var model = new Models.TableSettingModel(table.SchemaName, table.TableName);
+            var lineItem = new TableLineItem(model, _fieldTypeLineItems);
 
-            if (!existingTables.Contains(menuItem.Name))
+            if (!existingTables.Contains(lineItem.DisplayName))
             {
-                this.MenuLineItems.Add(menuItem);
+                this.TableLineItems.Add(lineItem);
             }
         }
     }
@@ -162,43 +162,16 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
 
     #region SelectMenuItem Command
 
-    public NinjaMvvm.Wpf.RelayCommand<MenuLineItem> SelectMenuItemCommand => new NinjaMvvm.Wpf.RelayCommand<MenuLineItem>((param) => _toastFaultlessExecutionService.TryExecuteAsync(() => this.SelectMenuItemAsync(param)));
+    public NinjaMvvm.Wpf.RelayCommand<TableLineItem> SelectMenuItemCommand => new NinjaMvvm.Wpf.RelayCommand<TableLineItem>((param) => _toastFaultlessExecutionService.TryExecuteAsync(() => this.SelectMenuItemAsync(param)));
 
-    public async Task SelectMenuItemAsync(MenuLineItem item)
+    public async Task SelectMenuItemAsync(TableLineItem item)
     {
-        var vm = new ContentViewModel();
         this.IsBusy = true;
         try
         {
-            if (item.IsAll)
+            if (!item.HasBeenLoadedFromDatabase)
             {
-                //all
-                foreach (var x in this.MenuLineItems)
-                {
-                    if (!x.IsAll && x.HasConfig && x.TableLineItem != null)
-                    {
-                        vm.TableLineItems.Add(x.TableLineItem);
-                    }
-                }
-            }
-            else
-            {
-                if (item.TableLineItem != null)
-                {
-                    vm.TableLineItems.Add(item.TableLineItem);
-                }
-                else
-                {
-                    //really shouldn't see this....if it's not "all" there should be tablelineitem
-                }
-            }
-
-            foreach (var t in vm.TableLineItems)
-            {
-                if (!t.HasBeenLoadedFromDatabase)
-                {
-                    await this.LoadColumnsAsync(t);
-                }
+                await this.LoadColumnsAsync(item);
             }
         }
         finally
@@ -206,9 +179,7 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
             this.IsBusy = false;
         }
 
-
-        this.MainContent = vm;
-
+        this.SelectedTableLineItem = item;
     }
 
     #endregion
@@ -282,9 +253,8 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
     {
         var p = new Models.ProfileModel(profileName: "TODO: name");
 
-        foreach (var menuItem in this.MenuLineItems.Where(x => x.HasConfig))
+        foreach (var lineItem in this.TableLineItems.Where(x => x.HasConfig))
         {
-            var lineItem = menuItem.TableLineItem!;//remove null warning because "HasConfig" means there is a model
             var t = new Models.TableSettingModel(schemaName: lineItem.SchemaName, tableName: lineItem.TableName);
             t.Randomize = true;//one day this will be a setting, for now we default to true
             p.TableSettings.Add(t);
@@ -301,11 +271,11 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
         return p;
     }
 
-    public ObservableCollection<MenuLineItem> MenuLineItems { get; } = new ObservableCollection<MenuLineItem>();
+    public ObservableCollection<TableLineItem> TableLineItems { get; } = new ObservableCollection<TableLineItem>();
 
-    public ContentViewModel MainContent
+    public TableLineItem SelectedTableLineItem
     {
-        get { return GetField<ContentViewModel>(); }
+        get { return GetField<TableLineItem>(); }
         set { SetField(value); }
     }
 
@@ -313,76 +283,6 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
     {
         get { return GetField<string>(); }
         set { SetField(value); }
-    }
-
-    public class MenuLineItem : NinjaMvvm.NotificationBase
-    {
-        public MenuLineItem()
-        {
-
-        }
-
-        public MenuLineItem(TableLineItem tableLineItem)
-        {
-            this.Name = tableLineItem.DisplayName;
-            this.TableLineItem = tableLineItem;
-            this.TableLineItem.ColumnLineItems.ItemPropertyChangedEvent += this.ColumnLineItems_ItemPropertyChangedEvent;
-            this.TableLineItem.ColumnLineItems.CollectionChanged += this.ColumnLineItems_CollectionChanged;
-            this.ReComputeHasConfig();
-        }
-
-        private void ColumnLineItems_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            this.ReComputeHasConfig();
-        }
-
-        private void ColumnLineItems_ItemPropertyChangedEvent(object sender, NinjaMvvm.ItemPropertyChangedEventArgs<ColumnLineItem> e)
-        {
-            if (this.TableLineItem == null)
-                return;
-
-            if (e.PropertyName == nameof(ColumnLineItem.HasSelectedFieldType))
-            {
-                this.ReComputeHasConfig();
-            }
-        }
-        private void ReComputeHasConfig()
-        {
-            if (this.TableLineItem == null)
-                return;
-
-            this.HasConfig = this.TableLineItem.ColumnLineItems.Any(x => x.HasSelectedFieldType);
-        }
-
-        public bool IsAll
-        {
-            get { return GetField<bool>(); }
-            set { SetField(value); }
-        }
-
-        public string Name
-        {
-            get { return GetField<string>(); }
-            set { SetField(value); }
-        }
-
-        public bool HasConfig
-        {
-            get { return GetField<bool>(); }
-            set { SetField(value); }
-        }
-
-        public TableLineItem? TableLineItem
-        {
-            get { return GetField<TableLineItem?>(); }
-            private set { SetField(value); }
-        }
-
-    }
-
-    public class ContentViewModel : NinjaMvvm.NotificationBase
-    {
-        public ObservableCollection<TableLineItem> TableLineItems { get; } = new ObservableCollection<TableLineItem>();
     }
 
 
@@ -397,9 +297,35 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
             {
                 this.ColumnLineItems.Add(new ColumnLineItem(c, fieldTypeLineItems));
             }
+            this.ColumnLineItems.ItemPropertyChangedEvent += this.ColumnLineItems_ItemPropertyChangedEvent;
+            this.ColumnLineItems.CollectionChanged += this.ColumnLineItems_CollectionChanged;
+            this.ReComputeHasConfig();
+        }
+
+        private void ColumnLineItems_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            this.ReComputeHasConfig();
+        }
+
+        private void ColumnLineItems_ItemPropertyChangedEvent(object sender, NinjaMvvm.ItemPropertyChangedEventArgs<ColumnLineItem> e)
+        {
+            if (e.PropertyName == nameof(ColumnLineItem.HasSelectedFieldType))
+            {
+                this.ReComputeHasConfig();
+            }
+        }
+        private void ReComputeHasConfig()
+        {
+            this.HasConfig = this.ColumnLineItems.Any(x => x.HasSelectedFieldType);
         }
 
         public string DisplayName => $"{this.SchemaName}.{this.TableName}";
+
+        public bool HasConfig
+        {
+            get { return GetField<bool>(); }
+            set { SetField(value); }
+        }
 
         public string SchemaName
         {
@@ -512,28 +438,6 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
         #endregion
 
         public NinjaMvvm.NotificationObservableCollection<SelectableFieldTypeLineItem> FieldTypes { get; }
-        public class SelectableFieldTypeLineItem : NinjaMvvm.NotificationBase
-        {
-            public SelectableFieldTypeLineItem(FieldTypeLineItem fieldTypeLineItem)
-            {
-                this.Name = fieldTypeLineItem.Name;
-                this.FieldTypeProcessorTypeName = fieldTypeLineItem.FieldTypeProcessorTypeName;
-            }
-            public bool IsSelected
-            {
-                get { return GetField<bool>(); }
-                set { SetField(value); }
-            }
-
-            public bool IsRecommended
-            {
-                get { return GetField<bool>(); }
-                set { SetField(value); }
-            }
-
-            public string Name { get; }
-            public string FieldTypeProcessorTypeName { get; }
-        }
     }
 
     public class FieldTypeLineItem
@@ -549,4 +453,27 @@ public class ProfileViewModel : NinjaMvvm.Wpf.WpfViewModelBase
         public string FieldTypeProcessorTypeName { get; }
         public Func<string, bool>? RecommendedAction { get; }
     }
+    public class SelectableFieldTypeLineItem : NinjaMvvm.NotificationBase
+    {
+        public SelectableFieldTypeLineItem(FieldTypeLineItem fieldTypeLineItem)
+        {
+            this.Name = fieldTypeLineItem.Name;
+            this.FieldTypeProcessorTypeName = fieldTypeLineItem.FieldTypeProcessorTypeName;
+        }
+        public bool IsSelected
+        {
+            get { return GetField<bool>(); }
+            set { SetField(value); }
+        }
+
+        public bool IsRecommended
+        {
+            get { return GetField<bool>(); }
+            set { SetField(value); }
+        }
+
+        public string Name { get; }
+        public string FieldTypeProcessorTypeName { get; }
+    }
+
 }
