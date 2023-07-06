@@ -71,16 +71,11 @@ public class ProfileProcessor : Abstractions.IProfileProcessor
     {
         var primaryKeyColumns = this.GetPrimaryKeyColumnNames(connection, t);
 
-        List<string> columnsToPull = t.ColumnSettings.Select(x => x.ColumnName)
-            .Union(primaryKeyColumns)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
         var sb = new System.Text.StringBuilder();
         sb.Append("SELECT ");
         bool first = true;
 
-        foreach (var columnName in columnsToPull)
+        foreach (var columnName in primaryKeyColumns)
         {
             if (first)
             {
