@@ -15,7 +15,10 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+
             <!--  this hamburger menu style was copied from MahApps Sample.  Specifically, it's the "CreatorsUpdate" sample  -->
+            <!--  this is the style for the individual left side menu items  -->
+            <!--  it must be listed BEFORE the MyMenu, since MyMenu references  -->
             <Style
                 x:Key="MyMenuItem"
                 BasedOn="{StaticResource MahApps.Styles.ListBoxItem.HamburgerMenuItem}"
@@ -38,6 +41,7 @@
                 </Style.Triggers>
             </Style>
 
+            <!--  style for the left side menu  -->
             <Style
                 x:Key="MyMenu"
                 BasedOn="{StaticResource MahApps.Styles.HamburgerMenu}"
@@ -48,6 +52,8 @@
                 <Setter Property="PaneForeground" Value="{DynamicResource MahApps.Brushes.Text}" />
                 <Setter Property="ShowSelectionIndicator" Value="True" />
             </Style>
+
+            <!--  style for the buttons to select a field type e.g. First Name  -->
             <Style
                 x:Key="FieldTypeSelectorButton"
                 BasedOn="{StaticResource MahApps.Styles.Button}"
@@ -70,6 +76,83 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
+
+            <!--  template for the left side menu items  -->
+            <DataTemplate x:Key="MyMenuItemTemplate" DataType="{x:Type localvm:ProfileViewModel+TableLineItem}">
+                <Grid Height="48">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:HamburgerMenu}}, Path=CompactPaneLength}" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <iconPacks:PackIconMaterial
+                        Grid.Column="0"
+                        Width="10"
+                        Height="10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Kind="Circle"
+                        Visibility="{Binding HasConfig, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Text="{Binding DisplayName}" />
+                </Grid>
+            </DataTemplate>
+
+            <!--  main template for the setup/config of a specific column  -->
+            <DataTemplate x:Key="ColumnSetupTemplate" DataType="{x:Type localvm:ProfileViewModel+ColumnLineItem}">
+                <Border Padding="5" CornerRadius="2">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource MahApps.Brushes.Accent4}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="ColNameGroup" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Label
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Content="{Binding Name}">
+                            <Label.Style>
+                                <Style TargetType="Label">
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasSelectedFieldType}" Value="True">
+                                            <Setter Property="Opacity" Value="1" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Label.Style>
+                        </Label>
+                        <ItemsControl Grid.Column="1" ItemsSource="{Binding FieldTypes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Command="{Binding DataContext.SelectFieldTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{Binding Name}"
+                                        Style="{StaticResource FieldTypeSelectorButton}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -78,6 +161,8 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
+        <!--  Connection string textbox and edit button  -->
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -115,40 +200,17 @@
                 IsPaneOpen="True"
                 ItemCommand="{Binding SelectMenuItemCommand}"
                 ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
+                ItemTemplate="{StaticResource MyMenuItemTemplate}"
                 ItemsSource="{Binding TableLineItems}"
                 MaximumOpenPaneLength="800"
                 OpenPaneLength="400"
                 Style="{StaticResource MyMenu}"
                 VerticalScrollBarOnLeftSide="True">
-                <mah:HamburgerMenu.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="48">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:HamburgerMenu}}, Path=CompactPaneLength}" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <iconPacks:PackIconMaterial
-                                Grid.Column="0"
-                                Width="10"
-                                Height="10"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Kind="Circle"
-                                Visibility="{Binding HasConfig, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <TextBlock
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                Text="{Binding DisplayName}" />
-                        </Grid>
-                    </DataTemplate>
-                </mah:HamburgerMenu.ItemTemplate>
 
                 <!--  Content  -->
                 <mah:HamburgerMenu.ContentTemplate>
                     <DataTemplate>
-                        <mah:TransitioningContentControl
-                            Content="{Binding SelectedTableLineItem}"
-                            Transition="Default">
+                        <mah:TransitioningContentControl Content="{Binding SelectedTableLineItem}" Transition="Default">
                             <mah:TransitioningContentControl.ContentTemplate>
                                 <DataTemplate>
                                     <!--  Tables List  -->
@@ -171,62 +233,8 @@
                                             <ItemsControl
                                                 Grid.Row="1"
                                                 Margin="10"
-                                                ItemsSource="{Binding ColumnLineItems}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Padding="5" CornerRadius="2">
-                                                            <Border.Style>
-                                                                <Style TargetType="Border">
-                                                                    <Style.Triggers>
-                                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                                            <Setter Property="Background" Value="{StaticResource MahApps.Brushes.Accent4}" />
-                                                                        </Trigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Border.Style>
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColNameGroup" />
-                                                                    <ColumnDefinition />
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <Label
-                                                                    Grid.Column="0"
-                                                                    HorizontalAlignment="Stretch"
-                                                                    VerticalAlignment="Center"
-                                                                    Content="{Binding Name}">
-                                                                    <Label.Style>
-                                                                        <Style TargetType="Label">
-                                                                            <Setter Property="Opacity" Value="0.5" />
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding HasSelectedFieldType}" Value="True">
-                                                                                    <Setter Property="Opacity" Value="1" />
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </Label.Style>
-                                                                </Label>
-                                                                <ItemsControl Grid.Column="1" ItemsSource="{Binding FieldTypes}">
-                                                                    <ItemsControl.ItemsPanel>
-                                                                        <ItemsPanelTemplate>
-                                                                            <WrapPanel Orientation="Horizontal" />
-                                                                        </ItemsPanelTemplate>
-                                                                    </ItemsControl.ItemsPanel>
-                                                                    <ItemsControl.ItemTemplate>
-                                                                        <DataTemplate>
-                                                                            <Button
-                                                                                Command="{Binding DataContext.SelectFieldTypeCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                                                CommandParameter="{Binding}"
-                                                                                Content="{Binding Name}"
-                                                                                Style="{StaticResource FieldTypeSelectorButton}" />
-                                                                        </DataTemplate>
-                                                                    </ItemsControl.ItemTemplate>
-                                                                </ItemsControl>
-                                                            </Grid>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
+                                                ItemTemplate="{StaticResource ColumnSetupTemplate}"
+                                                ItemsSource="{Binding ColumnLineItems}" />
                                         </Grid>
 
                                     </ScrollViewer>
