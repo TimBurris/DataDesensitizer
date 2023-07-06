@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace DataDesensitizer.FieldTypeProcessors;
 public class StreetAddressLineFieldTypeProcessor : SourceFileFieldTypeProcessorBase, Abstractions.IFieldTypeProcessor, IDisposable
@@ -15,10 +14,10 @@ public class StreetAddressLineFieldTypeProcessor : SourceFileFieldTypeProcessorB
     public string Name => "Street Address Line";
     protected override string Filename => "StreetNames.txt";
 
-    public override object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public override object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         //use the base File processor to get a street name, then we'll randomly add a street number
-        var streetName = base.GetNewValue(columnSetting, dataReader);
+        var streetName = base.GetNewValue(columnSetting);
         var streetNumber = this.GenerateRandomNumber();
 
         return streetNumber + " " + streetName;

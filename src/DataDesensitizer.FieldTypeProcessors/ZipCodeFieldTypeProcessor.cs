@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace DataDesensitizer.FieldTypeProcessors;
@@ -15,7 +14,7 @@ public class ZipCodeFieldTypeProcessor : Abstractions.IFieldTypeProcessor
 
     public string Name => "Zip Code";
 
-    public object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         return this.GenerateRandomNumber(length: 5);
     }

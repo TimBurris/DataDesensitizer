@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace DataDesensitizer.FieldTypeProcessors;
@@ -18,7 +17,7 @@ public class SocialSecurityNumberFieldTypeProcessor : Abstractions.IFieldTypePro
     public bool Formatted { get; set; } = true;
 
 
-    public object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         int length = 9;
 

@@ -182,7 +182,7 @@ public class ProfileProcessor : Abstractions.IProfileProcessor
             {
                 var processor = fieldProcessorsByColumnSetting[columnSetting];
 
-                object? value = processor.GetNewValue(columnSetting, dataReader);
+                object? value = processor.GetNewValue(columnSetting);
                 string paramName = $"@{i}";
 
                 if (i > 0)

@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace DataDesensitizer.FieldTypeProcessors;
 
@@ -20,7 +19,7 @@ public abstract class SourceFileFieldTypeProcessorBase
         return Path.Combine(_settings.DataFilesPath, this.Filename);
     }
 
-    public virtual object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public virtual object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         //I could support things like "randomize" but is that really necessary?
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace DataDesensitizer.FieldTypeProcessors;
 
@@ -19,7 +18,7 @@ public class SalaryFieldTypeProcessor : Abstractions.IFieldTypeProcessor
     //public int Maximum { get; set; } = 500000;
     //public bool RoundToNearestThousand { get; set; } = true;
 
-    public object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         return this.GenerateRandomSalary();
     }

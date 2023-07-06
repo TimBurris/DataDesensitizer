@@ -1,5 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace DataDesensitizer.FieldTypeProcessors;
@@ -21,7 +20,7 @@ public class PhoneNumberFieldTypeProcessor : Abstractions.IFieldTypeProcessor
     //TODO: support Formats like "None" or standard or hyphened, etc maybe some type of "template" {country} ({areacode}) {whaterver}-{whateverx}
     //TODO: maybe allow them to specify they all have 555 to ensure no "real" number?  that could be handled by the template, right?
 
-    public object? GetNewValue(Models.ColumnSettingModel columnSetting, SqlDataReader dataReader)
+    public object? GetNewValue(Models.ColumnSettingModel columnSetting)
     {
         return this.GenerateRandomPhoneNumber();
     }
